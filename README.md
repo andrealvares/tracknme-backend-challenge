@@ -16,16 +16,16 @@ O endpoint deve expor as seguintes operações no seguinte formato REST:
 1) GET /locations
 (Recupera as entidades persistidas.)
 
-2) GET /locations/<ID>
+2) GET /locations/{ID}
 (Recupera apenas uma entidade persistida pelo ID.)
 
 3) POST /locations
 (Cria ou atualiza uma entidade recebida em formato JSON no corpo da requisição. Retorna a entidade criada.)
 
-4) PATCH /locations/<ID>
+4) PATCH /locations/{ID}
 (Atualiza apenas os atributos de uma entidade informados no corpo da requisição. Retorna a entidade atualizada.)
 
-5) DELETE /locations/<ID>
+5) DELETE /locations/{ID}
 (Remove e retorna uma entidade por ID.)
 
 PS.: A entidade "Location" deve ser recebida e recuperada através do endpoint em formato JSON.
