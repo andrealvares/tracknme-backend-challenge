@@ -3,7 +3,7 @@
 
 # Desafio Backend
 
-O candidato deve dar **fork** neste repositório e após o termino do desenvolvimento, realizar um **pull request** para análise do time.
+O candidato deve dar **fork** neste repositório e após o termino do desenvolvimento, realizar um **pull request** e avisar por **email** para análise do time.
 
 O desafio consiste em criar um micro-serviço com as seguintes características:
 
