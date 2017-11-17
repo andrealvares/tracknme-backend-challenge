@@ -13,19 +13,19 @@ Criar um endpoint REST que implemente as operações CRUD da entidade "Location"
 
 O endpoint deve expor as seguintes operações no seguinte formato REST:
 
-GET /locations
+1) GET /locations
 (Recupera as entidades persistidas.)
 
-GET /locations/<ID>
+2) GET /locations/<ID>
 (Recupera apenas uma entidade persistida pelo ID.)
 
-POST /locations
+3) POST /locations
 (Cria ou atualiza uma entidade recebida em formato JSON no corpo da requisição. Retorna a entidade criada.)
 
-PATCH /locations/<ID>
+4) PATCH /locations/<ID>
 (Atualiza apenas os atributos de uma entidade informados no corpo da requisição. Retorna a entidade atualizada.)
 
-DELETE /locations/<ID>
+5) DELETE /locations/<ID>
 (Remove e retorna uma entidade por ID.)
 
 PS.: A entidade "Location" deve ser recebida e recuperada através do endpoint em formato JSON.
