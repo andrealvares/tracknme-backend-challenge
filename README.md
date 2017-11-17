@@ -34,7 +34,7 @@ Exemplo:
 ``` json
 {
     "id": 123456,
-	"trackerId": 654321,
+    "trackerId": 654321,
     "dateTime": "2017-10-12T21:34:15",
     "latitude": -23.9626767,
     "longitude": -46.3884785
@@ -53,7 +53,7 @@ Sugerimos que sejam implementadas as seguintes regras:
 ``` json
 {
     "id": 654321,
-	"name": "Meu rastreador",
+    "name": "Meu rastreador",
     "latitude": -23.9626767,
     "longitude": -46.3884785
 }
