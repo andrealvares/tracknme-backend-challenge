@@ -74,7 +74,7 @@ public class LocationBusinessLogicImpl implements LocationBusinessLogic {
     public LocationDto updateLocation(LocationDto locationDto, long id) throws TrackNMException {
         if (locationDto == null || id <= 0) return null;
         Location locationEntity = locationRepository.getLocation(id);
-        if (locationEntity == null) return null;
+        if (locationEntity == null) throw new TrackNMException("Location no longer exists!");
         setFieldsFromLocationDto(locationEntity, locationDto);
         locationEntity = locationRepository.updateLocation(locationEntity);
         return convert2Dto(locationEntity);

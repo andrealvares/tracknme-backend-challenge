@@ -1,5 +1,6 @@
 package br.com.tracknme.application;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -12,6 +13,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  */
 @Configuration
 public class RedisContext {
+
+    @Value("${redis.database.number}")
+    private Integer redisDatabaseNumber;
 
     @Bean
     public StringRedisSerializer stringSerializer() {
@@ -26,7 +30,7 @@ public class RedisContext {
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
-        jedisConnectionFactory.setDatabase(3);
+        jedisConnectionFactory.setDatabase(redisDatabaseNumber);
         return jedisConnectionFactory;
     }
 
