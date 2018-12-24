@@ -13,19 +13,19 @@ Criar um endpoint REST que implemente as operações CRUD da entidade "Location"
 
 O endpoint deve expor as seguintes operações no seguinte formato REST:
 
-1) GET /locations
+1) GET /locations---------------------------------------------------------------------------------------------------------------------------------------------OK
 (Recupera as entidades persistidas.)
 
-2) GET /locations/{ID}
+2) GET /locations/{ID}---------------------------------------------------------------------------------------------------------------------------------------OK
 (Recupera apenas uma entidade persistida pelo ID.)
 
-3) POST /locations
+3) POST /locations-------------------------------------------------------------------------------------------------------------------------------------------OK
 (Cria ou atualiza uma entidade recebida em formato JSON no corpo da requisição. Retorna a entidade criada.)
 
-4) PATCH /locations/{ID}
+4) PATCH /locations/{ID}-------------------------------------------------------------------------------------------------------------------------------------OK
 (Atualiza apenas os atributos de uma entidade informados no corpo da requisição. Retorna a entidade atualizada.)
 
-5) DELETE /locations/{ID}
+5) DELETE /locations/{ID}------------------------------------------------------------------------------------------------------------------------------------OK
 (Remove e retorna uma entidade por ID.)
 
 PS.: A entidade "Location" deve ser recebida e recuperada através do endpoint em formato JSON.
@@ -47,8 +47,11 @@ Exemplo:
 É importante que o micro-serviço seja bastante flexivel para adicionar novas regras de negócio.
 
 Sugerimos que sejam implementadas as seguintes regras:
-1) Não permitir que uma nova posição (Location) seja criada, se a distancia entre essa posição e a última for menor que 10 metros.
-2) Após a persistencia de uma nova posição (Location), replicar assincronamente os valores dos atributos latitude e longitude para uma entidade Tracker sugerida abaixo:
+1) Não permitir que uma nova posição (Location) seja criada, se a distancia
+entre essa posição e a última for menor que 10 metros. -------------------------------------------------------------------------------------------------------OK
+
+2) Após a persistencia de uma nova posição (Location), replicar assincronamente
+os valores dos atributos latitude e longitude para uma entidade Tracker sugerida abaixo: ---------------------------------------------------------------------OK
 
 ``` json
 {
@@ -62,11 +65,12 @@ Sugerimos que sejam implementadas as seguintes regras:
 
 # Task 3 - Arquitetura interna, testes autimatizados e clean Code [Recomendado]
 
-Sugerimos que o projeto seja separado em camadas. O acoplamento entre as camadas deve ser baixo. Uma sugestão é utilizar injeção de dependencias para manter o acoplamento baixo.
+Sugerimos que o projeto seja separado em camadas. O acoplamento entre as camadas deve ser baixo.
+Uma sugestão é utilizar injeção de dependencias para manter o acoplamento baixo. ----------------------------------------------------------------------------OK
 
-É recomendado que o desenvolvedor utilize de ferramentas de automação de testes para garantir a qualidade do micro-serviço.
+É recomendado que o desenvolvedor utilize de ferramentas de automação de testes para garantir a qualidade do micro-serviço. ---------------------------------OK
 
-Será considerado um diferencial se o desenvolvedor aplicar as boas práticas de clean code.
+Será considerado um diferencial se o desenvolvedor aplicar as boas práticas de clean code. ------------------------------------------------------------------OK
 
 
 # Task 4 - Deploy em ambiente cloud [Opcional]
