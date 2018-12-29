@@ -1,5 +1,7 @@
 package location;
 import data.LocationsDataSource;
+import exception.DistanceBetweenLocationsException;
+
 import java.util.List;
 
 public class LocationServiceImpl implements LocationService {
@@ -10,7 +12,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public LocationEntity create(LocationEntity location) {
+    public LocationEntity create(LocationEntity location) throws DistanceBetweenLocationsException {
         return locationsDataSource.create(location);
     }
 

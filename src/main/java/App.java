@@ -1,7 +1,13 @@
 import com.google.gson.Gson;
 import data.LocationsDataSource;
+import data.TrackerDataSource;
+import exception.DistanceBetweenLocationsException;
 import location.LocationEntity;
+import location.LocationService;
 import location.LocationServiceImpl;
+import tracker.TrackerEntity;
+import tracker.TrackerService;
+import tracker.TrackerServiceImpl;
 import util.Path;
 import java.util.List;
 import static spark.Spark.get;
@@ -16,11 +22,11 @@ public class App {
         /* INITIAL SETUP */
         port(8080);
         LocationsDataSource locationsDataSource = new LocationsDataSource();
-        LocationServiceImpl locationService = new LocationServiceImpl(locationsDataSource);
+        LocationService locationService = new LocationServiceImpl(locationsDataSource);
         Gson gson = new Gson();
 
         get("/" , "application/json", (request, response) -> {
-            return "<a href='/locations'>Locations ~> </a>";
+           return "<a href='/locations'>Locations ~></a>";
         });
 
         path(Path.LOCATIONS, () -> {
@@ -32,7 +38,12 @@ public class App {
                             Integer.parseInt(request.queryParams("trackerId")),
                             Double.parseDouble(request.queryParams("latitude")),
                             Double.parseDouble(request.queryParams("longitude")));
-                    return locationService.create(locationToSave);
+                    try{
+                        return locationService.create(locationToSave);
+                    }catch (DistanceBetweenLocationsException e){
+                        return e.getMessage();
+                    }
+
                 }
                 return "All parameters are required! Check the documentation for understand the parameters.";
             }, gson::toJson);

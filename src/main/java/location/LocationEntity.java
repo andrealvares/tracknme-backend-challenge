@@ -55,12 +55,10 @@ public class LocationEntity {
 
     @Override
     public String toString() {
-        return "{\n" +
-                "\"id\": "+getId()+",\n" +
+        return "\"id\": "+getId()+",\n" +
                 "\"dateTime\": \""+getDateTime()+"\",\n" +
                 "\"trackerId\": "+getTrackerId()+",\n" +
                 "\"latitude\": "+getLatitude()+",\n" +
-                "\"longitude\": "+getLongitude()+"\n" +
-                "}";
+                "\"longitude\": "+getLongitude()+"\n";
     }
 }

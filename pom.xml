@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>tracknme</groupId>
     <artifactId>tracknme</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -17,6 +16,17 @@
                     <target>8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>appengine-maven-plugin</artifactId>
+                <version>1.3.2</version>
+                <configuration>
+                    <project>tracknme-0111</project>
+                    <version>1</version>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -38,7 +48,5 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>3.6.3</version>
         </dependency>
-
-
     </dependencies>
 </project>
