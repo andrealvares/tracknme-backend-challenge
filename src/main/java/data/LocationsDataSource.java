@@ -2,58 +2,71 @@ package data;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import exception.DistanceBetweenLocationsException;
 import location.LocationEntity;
 import org.bson.Document;
-import org.bson.conversions.Bson;
+import tracker.TrackerEntity;
+import tracker.TrackerService;
+import tracker.TrackerServiceImpl;
 import util.Constants;
-
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 
 public class LocationsDataSource {
 
-    final private MongoClientURI uri = new MongoClientURI(Constants.MONGO_CLIENT_URI);
-    final private MongoClient mongoClient = new MongoClient(uri);
-    final private  MongoDatabase database = mongoClient.getDatabase(Constants.DATABASE_NAME);
-    final private MongoCollection<Document> collection = database.getCollection(Constants.COLLECTION_NAME);
+    private MongoCollection<Document> locationsCollection;
+    private TrackerService trackerService;
 
-    public LocationsDataSource(){ }
+    public LocationsDataSource(){
+        locationsCollection = new Database().getLocationCollection();
+        trackerService = new TrackerServiceImpl(new TrackerDataSource());
+    }
 
-    public LocationEntity create(LocationEntity locationToSave){
+    public LocationEntity create(LocationEntity locationToSave) throws DistanceBetweenLocationsException {
         Document document = new Document();
-        int currentId = getLastId()+1;
-        locationToSave.setId(currentId);
-        document.append(Constants.FIELD_ID, locationToSave.getId());
-        document.append(Constants.FIELD_DATE_TIME, locationToSave.getDateTime());
-        document.append(Constants.FIELD_TRACKER_ID, locationToSave.getTrackerId());
-        document.append(Constants.FIELD_LATITUDE, locationToSave.getLatitude());
-        document.append(Constants.FIELD_LONGITUDE, locationToSave.getLongitude());
-        collection.insertOne(document);
+        LocationEntity lastLocation = getLastLocation();
+        if(distanceBetweenLocations(
+                locationToSave.getLatitude(),
+                locationToSave.getLongitude(),
+                lastLocation.getLatitude(),
+                lastLocation.getLongitude()) > Constants.MIN_DISTANCE_BETWEEN_LOCATIONS) {
+            int currentId = lastLocation.getId() + 1;
+            locationToSave.setId(currentId);
+            document.append(Constants.FIELD_ID, locationToSave.getId());
+            document.append(Constants.FIELD_DATE_TIME, locationToSave.getDateTime());
+            document.append(Constants.FIELD_TRACKER_ID, locationToSave.getTrackerId());
+            document.append(Constants.FIELD_LATITUDE, locationToSave.getLatitude());
+            document.append(Constants.FIELD_LONGITUDE, locationToSave.getLongitude());
+            locationsCollection.insertOne(document);
+            TrackerEntity tracker = new TrackerEntity(locationToSave.getTrackerId(), locationToSave.getLatitude(), locationToSave.getLongitude());
+            trackerService.updateTracker(tracker);
+        }else{
+            throw new DistanceBetweenLocationsException("Distance between the last location and the location you want to create is smaller than 10 meters.");
+        }
         return locationToSave;
     }
 
     public ArrayList<LocationEntity> getAll(){
-        FindIterable<Document> documents = collection.find(new Document()).sort(new BasicDBObject(Constants.FIELD_ID, -1));
         ArrayList<LocationEntity> locationEntities = new ArrayList<>();
-        documents.forEach((Block<? super Document>) item -> {
-            LocationEntity locationEntity = new Gson().fromJson(item.toJson(), LocationEntity.class);
-            locationEntities.add(locationEntity);
-        });
+        try {
+            FindIterable<Document> documents = locationsCollection.find(new Document()); //.sort(new BasicDBObject(Constants.FIELD_ID, -1));
+            documents.forEach((Block<? super Document>) item -> {
+                LocationEntity locationEntity = new Gson().fromJson(item.toJson(), LocationEntity.class);
+                locationEntities.add(locationEntity);
+            });
+        }catch (Exception e){
+            System.out.println(e.getCause());
+        }
         return locationEntities;
     }
 
     public LocationEntity findById(int id){
         LocationEntity locationEntity = null;
         try {
-            Document document = collection.find(new Document(Constants.FIELD_ID, id)).first();
+            Document document = locationsCollection.find(new Document(Constants.FIELD_ID, id)).first();
             locationEntity = new Gson().fromJson(document.toJson(), LocationEntity.class);
         }catch (Exception e){}
 
@@ -69,7 +82,7 @@ public class LocationsDataSource {
                 String[] params = param.split("=");
                 bodyHash.put(params[0], params[1]);
             }
-            Document found = collection.find(new Document(Constants.FIELD_ID, id)).first();
+            Document found = locationsCollection.find(new Document(Constants.FIELD_ID, id)).first();
             if(found != null){
                 locationEntity = buildUpdatedLocationEntity(bodyHash);
                 locationEntity.setId(id);
@@ -80,10 +93,10 @@ public class LocationsDataSource {
                 Document latitude = new Document(Constants.FIELD_LATITUDE, Double.parseDouble(bodyHash.get(Constants.FIELD_LATITUDE)));
                 Document longitude = new Document(Constants.FIELD_LONGITUDE, Double.parseDouble(bodyHash.get(Constants.FIELD_LONGITUDE)));
 
-                collection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", dateTime));
-                collection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", trackerId));
-                collection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", latitude));
-                collection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", longitude));
+                locationsCollection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", dateTime));
+                locationsCollection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", trackerId));
+                locationsCollection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", latitude));
+                locationsCollection.updateOne(eq(Constants.FIELD_ID, id), new Document("$set", longitude));
             }
         }catch (NullPointerException e){ }
         catch (Exception e){
@@ -93,14 +106,13 @@ public class LocationsDataSource {
     }
 
     public LocationEntity delete(int id){
-        Document deletedLocation = collection.findOneAndDelete(new Document(Constants.FIELD_ID, id));
+        Document deletedLocation = locationsCollection.findOneAndDelete(new Document(Constants.FIELD_ID, id));
         return new Gson().fromJson(deletedLocation.toJson(), LocationEntity.class);
     }
 
-    private int getLastId() {
-        Document search = collection.find(new Document()).sort(new BasicDBObject(Constants.FIELD_ID, -1)).first();
-        LocationEntity location = new Gson().fromJson(search.toJson(), LocationEntity.class);
-        return location.getId();
+    private LocationEntity getLastLocation() {
+        Document search = locationsCollection.find(new Document()).sort(new BasicDBObject(Constants.FIELD_ID, -1)).first();
+        return new Gson().fromJson(search.toJson(), LocationEntity.class);
     }
 
     private LocationEntity buildUpdatedLocationEntity(HashMap<String, String> bodyHash){
@@ -123,6 +135,20 @@ public class LocationsDataSource {
 
     private String fixDateTimeFormat(String wrongDateTime){
         return wrongDateTime.replace("%3A", ":");
+    }
+
+    private double distanceBetweenLocations(double latitude1, double longitude1, double latitude2, double longitude2){
+        int radiusOfEarth = 6371;
+        int meters = 1000;
+        double distanceLatitude = Math.toRadians(latitude2 - latitude1);
+        double distanceLongitude = Math.toRadians(longitude1 - longitude2);
+        double a = Math.sin(distanceLatitude / 2) * Math.sin(distanceLatitude / 2)
+                + Math.cos(Math.toRadians(latitude1)) * Math.cos(Math.toRadians(latitude2))
+                * Math.sin(distanceLongitude / 2) * Math.sin(distanceLongitude / 2);
+        double c = Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 2;
+        double distance = radiusOfEarth * c * meters;
+        distance = Math.pow(distance, 2) + Math.pow(0, 2);
+        return Math.sqrt(distance);
     }
 
 }
